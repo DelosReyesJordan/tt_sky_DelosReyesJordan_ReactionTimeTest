@@ -80,4 +80,3 @@ module reaction_fsm(
     end
 
 endmodule
-endmodule
