@@ -20,6 +20,12 @@ module reaction_time_top (
     wire show_error;
     wire done;
     wire delay_done;
+    wire led;
+    wire [2:0] state_out;
+    wire [13:0] elapsed_time;
+
+    // Timer output
+    wire [13:0] ms_time;
 
     // 7-segment display wires
     wire [6:0] seg;
@@ -27,6 +33,7 @@ module reaction_time_top (
     wire [1:0] current_digit;
     wire [13:0] value_to_display;
 
+    // Instantiate reaction FSM
     reaction_fsm fsm (
         .clk(clk),
         .reset(reset),
@@ -36,17 +43,24 @@ module reaction_time_top (
         .stop_timer(stop_timer),
         .show_error(show_error),
         .done(done),
-        .delay_done(delay_done)
+        .delay_done(delay_done),
+        .elapsed_time(elapsed_time),
+        .led(led),
+        .state_out(state_out)
     );
 
+    // Instantiate timer
     timer tmr (
         .clk(clk),
         .reset(reset),
         .start(start_timer),
         .stop(stop_timer),
-        .ms_time(value_to_display)  // Output to 7-segment driver
+        .ms_time(value_to_display),  // send to 7-segment driver
+        .done(done),
+        .delay_done(delay_done)
     );
 
+    // Instantiate 7-segment display driver
     seg7_driver display (
         .clk(clk),
         .reset(reset),
@@ -57,11 +71,10 @@ module reaction_time_top (
         .show_error(show_error)
     );
 
-    assign uo_out[0]   = done;     // LED for reaction done
-    assign uo_out[7:1] = seg;      // 7-segment segments
-    assign uio_out      = an;      // anode signals
-    assign uio_oe       = 4'b1111; // enable all anodes
+    // Output assignments
+    assign uo_out[0] = led;       // LED for reaction done or FSM LED
+    assign uo_out[7:1] = seg;     // 7-segment segments
+    assign uio_out = an;           // anode signals
+    assign uio_oe  = 4'b1111;     // enable all anodes
 
 endmodule
-
-
