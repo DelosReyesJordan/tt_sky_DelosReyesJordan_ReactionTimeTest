@@ -10,10 +10,10 @@ module seg7_driver (
     // Extract each decimal digit and mask to 4 bits
     wire [3:0] digits [3:0];
 
-    assign digits[3] = (value / 1000 % 10) & 4'hF;
-    assign digits[2] = (value / 100  % 10) & 4'hF;
-    assign digits[1] = (value / 10   % 10) & 4'hF;
-    assign digits[0] = (value % 10)      & 4'hF;
+    digits[3] = (value / 1000) % 10;
+    digits[2] = (value / 100)  % 10;
+    digits[1] = (value / 10)   % 10;
+    digits[0] = value % 10;
 
     reg [3:0] current_digit;
 
