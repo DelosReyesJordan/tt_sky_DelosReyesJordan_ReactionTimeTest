@@ -28,10 +28,10 @@ module seg7_driver(
 
     wire [3:0] digits [3:0];
 
-    assign digits[3] = ((value / 1000) % 10) & 4'hF;
-    assign digits[2] = ((value / 100)  % 10) & 4'hF;
-    assign digits[1] = ((value / 10)   % 10) & 4'hF;
-    assign digits[0] = ( value         % 10) & 4'hF;
+    assign digits[3] = 4'd0 + (value / 1000) % 10;
+    assign digits[2] = 4'd0 + (value / 100)  % 10;
+    assign digits[1] = 4'd0 + (value / 10)   % 10;
+    assign digits[0] = 4'd0 + value % 10;
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
