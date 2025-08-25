@@ -1,9 +1,9 @@
 module tt_um_DelosReyesJordan_HDL (
-    input  wire [7:0] ui_in,     // general inputs
-    output wire [7:0] uo_out,    // general outputs
+    input  wire [7:0] ui_in,     // general inputs (buttons)
+    output wire [7:0] uo_out,    // segments and LED
     input  wire [7:0] uio_in,    // not used
     output wire [7:0] uio_out,   // anode signals
-    output wire [7:0] uio_oe,    // drive anode signals
+    output wire [7:0] uio_oe,    // anode enable signals
     input  wire       ena,       // always 1
     input  wire       clk,       // system clock
     input  wire       rst_n      // active-low reset
@@ -12,45 +12,31 @@ module tt_um_DelosReyesJordan_HDL (
     // Active-high reset
     wire reset = ~rst_n;
 
-    // Map UI buttons
+    // Map buttons
     wire start_btn = ui_in[0];
     wire react_btn = ui_in[1];
 
-    // Signals for main reaction time module
-    wire led;
-    wire [6:0] seg;
+    // FSM signals
+    wire start_timer, stop_timer, show_error, done;
+    wire [13:0] elapsed_time;
+    wire [2:0] state_out;
+    wire [13:0] ms_time;
+
+    // 7-segment signals
     wire [3:0] an;
-
-    // Added signals to avoid implicit warnings
+    wire [6:0] seg;
     wire [13:0] value_to_display;
-    wire [1:0]  current_digit;
+    wire [1:0] current_digit;
 
-    // Instantiate your main reaction time tester
-    tt_um_DelosReyesJordan_ReactionTimeTest dut (
+    // Instantiate top-level reaction time module
+    reaction_time_top dut (
+        .ui_in(ui_in),
+        .uo_out(uo_out),
+        .uio_out(uio_out),
+        .uio_oe(uio_oe),
         .clk(clk),
-        .start_btn(start_btn),
-        .react_btn(react_btn),
-        .reset_btn(reset),
-        .led(led),
-        .seg(seg),
-        .an(an),
-        .value(value_to_display),
-        .digit_select(current_digit)
+        .rst_n(rst_n)
     );
-
-    // Output LED on uo_out[0]
-    assign uo_out[0] = led;
-
-    // Output 7-segment segments on uo_out[7:1]
-    assign uo_out[7:1] = seg;
-
-    // Output anode control on uio_out[3:0]
-    assign uio_out[3:0] = an;
-    assign uio_oe[3:0]  = 4'b1111;
-
-    // Disable unused upper 4 uio pins
-    assign uio_out[7:4] = 4'b0000;
-    assign uio_oe[7:4]  = 4'b0000;
 
     // Prevent unused input warnings
     wire unused = (&uio_in) & ena;
