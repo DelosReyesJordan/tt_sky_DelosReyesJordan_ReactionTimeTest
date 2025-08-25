@@ -47,9 +47,19 @@ jobs:
     needs: gds
     runs-on: ubuntu-24.04
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
+      pages: write
+      id-token: write
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Clean old GitHub Pages artifact
+        run: |
+          echo "Removing previous github-pages artifacts if they exist"
+          rm -f ./sim_build/viewer/github-pages.zip || true
+
       - uses: TinyTapeout/tt-gds-action/viewer@ttsky25a
         with:
           pdk: sky130
