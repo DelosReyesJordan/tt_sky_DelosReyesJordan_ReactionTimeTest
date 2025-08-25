@@ -1,8 +1,8 @@
 module reaction_time_top (
     input  wire [7:0] ui_in,     // general inputs (buttons)
     output wire [7:0] uo_out,    // general outputs (LEDs/segments)
-    output wire [7:0] uio_out,   // 8-bit 7-segment anode control
-    output wire [7:0] uio_oe,    // 8-bit anode output enable
+    output wire [3:0] uio_out,   // 7-segment anode control
+    output wire [3:0] uio_oe,    // anode output enable
     input  wire       clk,       // system clock
     input  wire       rst_n      // active-low reset
 );
@@ -20,17 +20,13 @@ module reaction_time_top (
     wire show_error;
     wire done;
     wire delay_done;
-    wire [13:0] elapsed_time;
-    wire led;
-    wire [2:0] state_out;
 
     // 7-segment display wires
     wire [6:0] seg;
-    wire [3:0] an_internal;
+    wire [3:0] an;
     wire [1:0] current_digit;
     wire [13:0] value_to_display;
 
-    // Instantiate reaction FSM
     reaction_fsm fsm (
         .clk(clk),
         .reset(reset),
@@ -40,41 +36,32 @@ module reaction_time_top (
         .stop_timer(stop_timer),
         .show_error(show_error),
         .done(done),
-        .delay_done(delay_done),
-        .elapsed_time(elapsed_time),
-        .led(led),
-        .state_out(state_out)
+        .delay_done(delay_done)
     );
 
-    // Instantiate timer
     timer tmr (
         .clk(clk),
         .reset(reset),
         .start(start_timer),
         .stop(stop_timer),
-        .ms_time(value_to_display),
-        .done(done),
-        .delay_done(delay_done)
+        .ms_time(value_to_display)  // Output to 7-segment driver
     );
 
-    // Instantiate 7-segment display driver
     seg7_driver display (
         .clk(clk),
         .reset(reset),
         .value(value_to_display),
         .digit_select(current_digit),
-        .an(an_internal),
+        .an(an),
         .seg(seg),
         .show_error(show_error)
     );
 
-    // --- Output assignments ---
-    assign uo_out[6:0] = seg;             // 7 segments
-    assign uo_out[7]   = led;            // LED for reaction done
-
-    // Map 4-bit anode signals to lower 4 bits of 8-bit output
-    assign uio_out = {4'b0000, an_internal};
-    assign uio_oe  = {4'b0000, 4'b1111};  // enable lower 4 anodes, upper 4 unused
+    assign uo_out[0]   = done;     // LED for reaction done
+    assign uo_out[7:1] = seg;      // 7-segment segments
+    assign uio_out      = an;      // anode signals
+    assign uio_oe       = 4'b1111; // enable all anodes
 
 endmodule
+
 
