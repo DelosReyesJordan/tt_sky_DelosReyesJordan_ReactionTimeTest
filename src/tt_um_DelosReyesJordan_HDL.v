@@ -16,10 +16,14 @@ module tt_um_DelosReyesJordan_HDL (
     wire start_btn = ui_in[0];
     wire react_btn = ui_in[1];
 
-    // Outputs
+    // Signals for main reaction time module
     wire led;
     wire [6:0] seg;
     wire [3:0] an;
+
+    // Added signals to avoid implicit warnings
+    wire [13:0] value_to_display;
+    wire [1:0]  current_digit;
 
     // Instantiate your main reaction time tester
     tt_um_DelosReyesJordan_ReactionTimeTest dut (
@@ -29,7 +33,9 @@ module tt_um_DelosReyesJordan_HDL (
         .reset_btn(reset),
         .led(led),
         .seg(seg),
-        .an(an)
+        .an(an),
+        .value(value_to_display),
+        .digit_select(current_digit)
     );
 
     // Output LED on uo_out[0]
