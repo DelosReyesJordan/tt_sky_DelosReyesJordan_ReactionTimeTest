@@ -24,7 +24,7 @@ module reaction_fsm(
         else
             state <= next;
 
-        state_out <= state;  // update state_out every clock cycle
+        state_out <= state;
     end
 
     // Next state logic and outputs
