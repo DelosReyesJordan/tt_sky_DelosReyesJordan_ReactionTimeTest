@@ -20,6 +20,9 @@ module reaction_time_top (
     wire show_error;
     wire done;
     wire delay_done;
+    wire [13:0] elapsed_time;
+    wire led;
+    wire [2:0] state_out;
 
     // 7-segment display wires
     wire [6:0] seg;
@@ -37,7 +40,10 @@ module reaction_time_top (
         .stop_timer(stop_timer),
         .show_error(show_error),
         .done(done),
-        .delay_done(delay_done)
+        .delay_done(delay_done),
+        .elapsed_time(elapsed_time),
+        .led(led),
+        .state_out(state_out)
     );
 
     // Instantiate timer
@@ -46,7 +52,7 @@ module reaction_time_top (
         .reset(reset),
         .start(start_timer),
         .stop(stop_timer),
-        .ms_time(value_to_display),  // Output to 7-segment driver
+        .ms_time(value_to_display),
         .done(done),
         .delay_done(delay_done)
     );
@@ -64,10 +70,11 @@ module reaction_time_top (
 
     // --- Output assignments ---
     assign uo_out[6:0] = seg;             // 7 segments
-    assign uo_out[7]   = done;            // LED for reaction done
+    assign uo_out[7]   = led;            // LED for reaction done
 
     // Map 4-bit anode signals to lower 4 bits of 8-bit output
     assign uio_out = {4'b0000, an_internal};
     assign uio_oe  = {4'b0000, 4'b1111};  // enable lower 4 anodes, upper 4 unused
 
 endmodule
+
