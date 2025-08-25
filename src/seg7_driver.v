@@ -28,11 +28,10 @@ module seg7_driver(
 
     wire [3:0] digits [3:0];
 
-    // Digit extraction with / and % — synthesis tools optimize constant division
-    assign digits[3] = (value / 1000) % 10; 
-    assign digits[2] = (value / 100) % 10;  
-    assign digits[1] = (value / 10) % 10;    
-    assign digits[0] = value % 10;          
+    assign digits[3] = ((value / 1000) % 10)[3:0];
+    assign digits[2] = ((value / 100)  % 10)[3:0];
+    assign digits[1] = ((value / 10)   % 10)[3:0];
+    assign digits[0] = ( value          % 10)[3:0];
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
