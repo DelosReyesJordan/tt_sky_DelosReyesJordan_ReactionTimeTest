@@ -1,10 +1,11 @@
 module seg7_driver (
-    input wire clk,
-    input wire reset,
-    input wire show_error,
-    input wire [13:0] value,   // 0–9999 decimal value
-    output reg [6:0] seg,      // segments a–g
-    output reg [3:0] an        // digit select (active low)
+    input  wire       clk,
+    input  wire       reset,
+    input  wire       show_error,
+    input  wire [13:0] value,   // 0–9999 decimal value
+    output reg  [6:0] seg,      // segments a–g
+    output reg  [3:0] an,       // digit select (active low)
+    output wire [1:0] digit_select  // expose current digit for top module
 );
 
     // Separate registers for each digit (no arrays in Verilog-2001)
@@ -12,12 +13,14 @@ module seg7_driver (
     reg [1:0] current_digit;
     reg [3:0] curr_digit_val;
 
+    assign digit_select = current_digit; // expose current digit
+
     // Digit extraction
     always @(*) begin
         if (show_error) begin
             // Show "Err" on display: digit3 = E, others = r
-            digit3 = 4'hE;   // 'E'
-            digit2 = 4'hF;   // We'll map 'r' in decoder
+            digit3 = 4'hE;   
+            digit2 = 4'hF;   
             digit1 = 4'hF;
             digit0 = 4'hF;
         end else begin
@@ -63,7 +66,7 @@ module seg7_driver (
             4'hC: seg = 7'b1000110;
             4'hD: seg = 7'b0100001;
             4'hE: seg = 7'b0000110; // 'E'
-            4'hF: seg = 7'b0110111; // 'r' (approximation)
+            4'hF: seg = 7'b0110111; // 'r'
             default: seg = 7'b1111111;
         endcase
     end
