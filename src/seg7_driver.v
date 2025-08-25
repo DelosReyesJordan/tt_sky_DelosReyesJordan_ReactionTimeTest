@@ -1,75 +1,49 @@
-module seg7_driver(
-    input clk,
-    input reset,
-    input [13:0] value,
-    input show_error,
-    output reg [6:0] seg,
-    output reg [3:0] an
+// seg7_driver.v
+// Drives a 4-digit 7-segment display
+
+module seg7_driver (
+    input  wire [13:0] value,        // value to display (0-9999)
+    input  wire [1:0]  digit_select, // selects which digit to show
+    output reg  [6:0]  seg            // 7-segment output a-g
 );
 
-    reg [3:0] digit_select;
-    reg [19:0] refresh_counter;
-
-    reg [6:0] seg_lut [0:11];
-    initial begin
-        seg_lut[0]  = 7'b1000000; // 0
-        seg_lut[1]  = 7'b1111001; // 1
-        seg_lut[2]  = 7'b0100100; // 2
-        seg_lut[3]  = 7'b0110000; // 3
-        seg_lut[4]  = 7'b0011001; // 4
-        seg_lut[5]  = 7'b0010010; // 5
-        seg_lut[6]  = 7'b0000010; // 6
-        seg_lut[7]  = 7'b1111000; // 7
-        seg_lut[8]  = 7'b0000000; // 8
-        seg_lut[9]  = 7'b0010000; // 9
-        seg_lut[10] = 7'b0000110; // E
-        seg_lut[11] = 7'b0101111; // r
-    end
-
+    // Extract each decimal digit and mask to 4 bits
     wire [3:0] digits [3:0];
 
-    wire [3:0] d3 = (value / 1000) % 10;
-    wire [3:0] d2 = (value / 100)  % 10;
-    wire [3:0] d1 = (value / 10)   % 10;
-    wire [3:0] d0 = value % 10;
+    assign digits[3] = (value / 1000 % 10) & 4'hF;
+    assign digits[2] = (value / 100  % 10) & 4'hF;
+    assign digits[1] = (value / 10   % 10) & 4'hF;
+    assign digits[0] = (value % 10)      & 4'hF;
 
-    assign digits[3] = d3;
-    assign digits[2] = d2;
-    assign digits[1] = d1;
-    assign digits[0] = d0;
+    reg [3:0] current_digit;
 
-
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
-            refresh_counter <= 0;
-            digit_select <= 0;
-        end else begin
-            refresh_counter <= refresh_counter + 1;
-            if (refresh_counter[15:0] == 0)
-                digit_select <= digit_select + 1;
-        end
+    // Select which digit to display
+    always @(*) begin
+        case (digit_select)
+            2'b00: current_digit = digits[0];
+            2'b01: current_digit = digits[1];
+            2'b10: current_digit = digits[2];
+            2'b11: current_digit = digits[3];
+            default: current_digit = 4'd0;
+        endcase
     end
 
+    // 7-segment encoding (common anode)
     always @(*) begin
-        reg [3:0] current_digit;
-
-        seg = 7'b1111111; // default all off
-        an  = 4'b1111;    // default all off
-
-        if (show_error) begin
-            case (digit_select)
-                4'd0: begin seg = 7'b1111111; an = 4'b1110; end // blank
-                4'd1: begin seg = seg_lut[11]; an = 4'b1101; end // r
-                4'd2: begin seg = seg_lut[11]; an = 4'b1011; end // r
-                4'd3: begin seg = seg_lut[10]; an = 4'b0111; end // E
-                default: begin seg = 7'b1111111; an = 4'b1111; end
-            endcase
-            current_digit = 4'd0; // assign something to avoid latch
-        end else begin
-            current_digit = digits[digit_select[1:0]];
-            seg = seg_lut[current_digit];
-            an = ~(4'b0001 << digit_select);
-        end
+        case (current_digit)
+            4'd0: seg = 7'b1000000;
+            4'd1: seg = 7'b1111001;
+            4'd2: seg = 7'b0100100;
+            4'd3: seg = 7'b0110000;
+            4'd4: seg = 7'b0011001;
+            4'd5: seg = 7'b0010010;
+            4'd6: seg = 7'b0000010;
+            4'd7: seg = 7'b1111000;
+            4'd8: seg = 7'b0000000;
+            4'd9: seg = 7'b0010000;
+            default: seg = 7'b1111111; // all segments off
+        endcase
     end
 
 endmodule
+
