@@ -1,34 +1,27 @@
 module reaction_time_top (
-    input wire clk,
-    input wire reset_btn,
-    input wire go_btn,
-    input wire react_btn,
-    output wire go_led,
-    output wire done,
-    output wire [6:0] seg,
-    output wire [3:0] an
+    input        clk,
+    input        reset_btn,
+    input        start_btn,
+    input        stop_btn,
+    input        adc_signal,        // example button/ADC input
+    output [3:0] an,               // 7-segment anodes
+    output [6:0] seg               // 7-segment segments
 );
-    
-    wire start_timer;
-    wire stop_timer;
-    wire reset_timer;
-    wire [13:0] elapsed_time;
 
-    wire show_error;
-    // value to send to display
-    wire [13:0] value_to_display;
+    wire delay_done, start_timer, stop_timer, show_error, done;
+    wire [13:0] elapsed_time;
+    wire [13:0] value_to_display;      // connects to seg7 driver
+    wire [1:0]  current_digit;
 
     reaction_fsm fsm (
         .clk(clk),
-        .reset(reset_btn),
-        .go_btn(go_btn),
-        .react_btn(react_btn),
-        .start_timer(start_timer),
-        .stop_timer(stop_timer),
-        .reset_timer(reset_timer),
-        .go_led(go_led),
-        .done(done),
-        .show_error(show_error)
+        .rst(reset_btn),
+        .start_btn(start_btn),
+        .stop_btn(stop_btn),
+        .delay_done(delay_done),
+        .elapsed_time(elapsed_time),
+        .led(show_error),        // or actual LED
+        .state_out()             // tie off if unused
     );
 
     timer tmr (
@@ -36,17 +29,15 @@ module reaction_time_top (
         .reset(reset_btn),
         .start(start_timer),
         .stop(stop_timer),
-        .reset_timer(reset_timer),
-        .elapsed_time(elapsed_time)
+        .ms_time(elapsed_time),
+        .done(done)
     );
-
-    assign value_to_display = elapsed_time;
 
     seg7_driver display (
         .clk(clk),
         .reset(reset_btn),
         .value(value_to_display),
-        .show_error(show_error),
+        .digit_select(current_digit),
         .seg(seg),
         .an(an)
     );
