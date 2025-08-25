@@ -9,7 +9,7 @@ module random_delay(
     reg [15:0] lfsr;
     wire feedback = lfsr[15] ^ lfsr[13] ^ lfsr[12] ^ lfsr[10];
 
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             counter <= 0;
             done <= 0;
