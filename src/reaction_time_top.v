@@ -43,13 +43,10 @@ module tt_um_DelosReyesJordan_ReactionTimeTest (
         .ms_time(ms_time)
     );
 
-    seg7_driver display(
-        .clk(clk),
-        .reset(reset_btn),
-        .value(ms_time),
-        .show_error(show_error),
-        .seg(seg),
-        .an(an)
+    seg7_driver display (
+        .value(value_to_display),       
+        .digit_select(current_digit),   
+        .seg(seg)                       
     );
-
+    
 endmodule
