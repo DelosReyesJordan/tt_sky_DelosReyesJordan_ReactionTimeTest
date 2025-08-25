@@ -29,10 +29,10 @@ module seg7_driver(
     wire [3:0] digits [3:0];
 
     // Digit extraction with / and % — synthesis tools optimize constant division
-    assign digits[3] = (value / 1000) % 10;
-    assign digits[2] = (value / 100) % 10;
-    assign digits[1] = (value / 10) % 10;
-    assign digits[0] = value % 10;
+    assign digits[3] = ((value / 1000) % 10)[3:0];
+    assign digits[2] = ((value / 100) % 10)[3:0];
+    assign digits[1] = ((value / 10) % 10)[3:0];
+    assign digits[0] = (value % 10)[3:0];
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -53,15 +53,15 @@ module seg7_driver(
 
         if (show_error) begin
             case (digit_select)
-                2'd0: begin seg = 7'b1111111; an = 4'b1110; end // blank
-                2'd1: begin seg = seg_lut[11]; an = 4'b1101; end // r
-                2'd2: begin seg = seg_lut[11]; an = 4'b1011; end // r
-                2'd3: begin seg = seg_lut[10]; an = 4'b0111; end // E
+                4'd0: begin seg = 7'b1111111; an = 4'b1110; end // blank
+                4'd1: begin seg = seg_lut[11]; an = 4'b1101; end // r
+                4'd2: begin seg = seg_lut[11]; an = 4'b1011; end // r
+                4'd3: begin seg = seg_lut[10]; an = 4'b0111; end // E
                 default: begin seg = 7'b1111111; an = 4'b1111; end
             endcase
             current_digit = 4'd0; // assign something to avoid latch
         end else begin
-            current_digit = digits[digit_select];
+            current_digit = digits[digit_select[1:0]];
             seg = seg_lut[current_digit];
             an = ~(4'b0001 << digit_select);
         end
