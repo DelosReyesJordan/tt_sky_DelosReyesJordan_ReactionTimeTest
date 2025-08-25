@@ -23,6 +23,11 @@ jobs:
         shell: bash
         run: pip install -r test/requirements.txt
 
+      - name: Prepare project.v
+        run: |
+          # Ensure test Makefile can find the expected file
+          ln -sf tt_um_DelosReyesJordan_ReactionTimeTest.v src/project.v
+
       - name: Run tests
         run: |
           cd test
