@@ -28,10 +28,16 @@ module seg7_driver(
 
     wire [3:0] digits [3:0];
 
-    assign digits[3] = 4'd0 + (value / 1000) % 10;
-    assign digits[2] = 4'd0 + (value / 100)  % 10;
-    assign digits[1] = 4'd0 + (value / 10)   % 10;
-    assign digits[0] = 4'd0 + value % 10;
+    wire [3:0] d3 = (value / 1000) % 10;
+    wire [3:0] d2 = (value / 100)  % 10;
+    wire [3:0] d1 = (value / 10)   % 10;
+    wire [3:0] d0 = value % 10;
+
+    assign digits[3] = d3;
+    assign digits[2] = d2;
+    assign digits[1] = d1;
+    assign digits[0] = d0;
+
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
